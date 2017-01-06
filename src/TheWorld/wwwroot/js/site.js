@@ -1,14 +1,16 @@
 ﻿
 (function () {
-    var ele = document.getElementById("username");
-    ele.innerHTML = 'Jim MacKenzie';
 
-    var main = document.getElementById("main");
-    main.onmouseenter = function () {
-        main.style.backgroundColor = "#888";
-    };
-    main.onmouseleave = function () {
-        main.style.backgroundColor = "";
-    };
-})
+    var $sidebarAndWrapper = $("#sidebar, #wrapper");
+        $("#sidebarToggle")
+            .on("click",
+                function() {
+                    $sidebarAndWrapper.toggleClass("hide-sidebar");
+                    if ($sidebarAndWrapper.hasClass("hide-sidebar")) {
+                        $(this).text("Show Sidebar");
+                    } else {
+                        $(this).text("Hide Sidebar");
+                    }
+                });
+    })
 ();
