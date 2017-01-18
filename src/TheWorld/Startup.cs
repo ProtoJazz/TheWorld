@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
+using Hangfire.AspNetCore;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -46,7 +50,7 @@ namespace TheWorld
             {
                 //do a real mail service. 
             }
-          
+           
             services.AddDbContext<WorldContext>();
             services.AddIdentity<WorldUser, IdentityRole>(config =>
             {
@@ -55,8 +59,13 @@ namespace TheWorld
                 config.Cookies.ApplicationCookie.LoginPath = "/Auth/Login";
 
             })
+
           .AddEntityFrameworkStores<WorldContext>();
             services.AddScoped<IWorldRepository, WorldRepository>();
+
+            string sConnectionString = _config["ConnectionStrings:WorldContextConnection"];
+            services.AddHangfire(x => x.UseSqlServerStorage(sConnectionString));
+
 
             services.AddTransient<WorldContextSeedData>();
             services.AddTransient<GeoCoordsService>();
@@ -83,6 +92,10 @@ namespace TheWorld
             {
                 loggerFactory.AddDebug(LogLevel.Error);
             }
+            app.UseHangfireDashboard();
+            app.UseHangfireServer();
+            RecurringJob.AddOrUpdate(
+                () => Debug.WriteLine("Minutely Job"), Cron.Minutely);
             app.UseStaticFiles();
             app.UseIdentity();
             Mapper.Initialize(config =>
